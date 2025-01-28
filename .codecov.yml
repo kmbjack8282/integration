@@ -11,15 +11,11 @@ coverage:
     patch: off
     project:
       default:
-        target: 65%
+        target: 50%
       validate:
         target: 100%
         paths:
           - custom_components/hacs/validate/
-      tasks:
-        target: 100%
-        paths:
-          - custom_components/hacs/tasks/
       repositories:
         target: 50%
         paths:

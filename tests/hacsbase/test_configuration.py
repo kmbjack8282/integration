@@ -24,14 +24,8 @@ def test_configuration_and_option():
     assert isinstance(config.appdaemon, bool)
     assert not config.appdaemon
 
-    assert isinstance(config.netdaemon, bool)
-    assert not config.netdaemon
-
     assert isinstance(config.python_script, bool)
     assert not config.python_script
-
-    assert isinstance(config.onboarding_done, bool)
-    assert not config.onboarding_done
 
     assert isinstance(config.theme, bool)
     assert not config.theme
@@ -42,8 +36,23 @@ def test_configuration_and_option():
     assert isinstance(config.release_limit, int)
     assert config.release_limit == 5
 
-    assert isinstance(config.experimental, bool)
-    assert not config.experimental
+
+def test_ignore_experimental():
+    """Test experimental setting is ignored."""
+    config = HacsConfiguration()
+    assert not hasattr(config, "experimental")
+
+    config.update_from_dict({"experimental": False})
+    assert not hasattr(config, "experimental")
+
+
+def test_ignore_netdaemon():
+    """Test netdaemon setting is ignored."""
+    config = HacsConfiguration()
+    assert not hasattr(config, "netdaemon")
+
+    config.update_from_dict({"netdaemon": True})
+    assert not hasattr(config, "netdaemon")
 
 
 def test_edge_update_with_none():
