@@ -4,14 +4,22 @@ on:
   schedule:
     - cron: "0 * * * *"
 
+concurrency:
+  group: lock-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lock:
     runs-on: ubuntu-latest
+    if: github.repository == 'hacs/integration'
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
-      - uses: dessant/lock-threads@v2.1.2
+      - name: 🔒 Lock closed issues and PRs
+        uses: dessant/lock-threads@v5.0.1
         with:
-          github-token: ${{ github.token }}
-          issue-lock-inactive-days: "14"
+          issue-inactive-days: "14"
           issue-lock-reason: ""
-          pr-lock-inactive-days: "1"
+          pr-inactive-days: "1"
           pr-lock-reason: ""

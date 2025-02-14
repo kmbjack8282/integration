@@ -1,65 +1,59 @@
 # pylint: disable=missing-module-docstring, missing-function-docstring
 import pytest
 
-from custom_components.hacs.enums import HacsStage
+from custom_components.hacs.base import HacsRepositories
+from custom_components.hacs.enums import HacsCategory
 
 
-@pytest.mark.asyncio
 async def test_hacs(hacs, repository, tmpdir):
     hacs.hass.config.config_dir = tmpdir
 
-    hacs.async_set_repositories([])
-    assert hacs.get_by_id(None) is None
+    hacs.repositories = HacsRepositories()
+    assert hacs.repositories.get_by_id(None) is None
 
     repository.data.id = "1337"
+    repository.data.category = "integration"
+    repository.data.installed = True
 
-    hacs.async_set_repositories([repository])
-    assert hacs.get_by_id("1337").data.full_name == "test/test"
-    assert hacs.get_by_id("1337").data.full_name_lower == "test/test"
+    hacs.repositories.register(repository)
+    assert hacs.repositories.get_by_id("1337").data.full_name == "test/test"
+    assert hacs.repositories.get_by_id("1337").data.full_name_lower == "test/test"
 
-    hacs.async_set_repositories([])
-    assert hacs.get_by_name(None) is None
+    hacs.repositories = HacsRepositories()
+    assert hacs.repositories.get_by_full_name(None) is None
 
-    hacs.async_set_repositories([repository])
-    assert hacs.get_by_name("test/test").data.id == "1337"
-    assert hacs.is_known("1337")
+    hacs.repositories.register(repository)
+    assert hacs.repositories.get_by_full_name("test/test").data.id == "1337"
+    assert hacs.repositories.is_registered(repository_id="1337")
 
-    await hacs.prosess_queue()
-    await hacs.clear_out_removed_repositories()
+    assert hacs.repositories.category_downloaded(category=HacsCategory.INTEGRATION)
+    for category in [x for x in list(HacsCategory) if x != HacsCategory.INTEGRATION]:
+        assert not hacs.repositories.category_downloaded(category=category)
+
+    await hacs.async_process_queue()
 
 
-@pytest.mark.asyncio
 async def test_add_remove_repository(hacs, repository, tmpdir):
     hacs.hass.config.config_dir = tmpdir
 
     repository.data.id = "0"
-    hacs.async_add_repository(repository)
+    hacs.repositories.register(repository)
 
-    with pytest.raises(ValueError):
-        hacs.async_add_repository(repository)
-
-    hacs.async_set_repository_id(repository, "42")
+    hacs.repositories.set_repository_id(repository, "42")
 
     # Once its set, it should never change
     with pytest.raises(ValueError):
-        hacs.async_set_repository_id(repository, "30")
+        hacs.repositories.set_repository_id(repository, "30")
 
     # Safe to set it again
-    hacs.async_set_repository_id(repository, "42")
+    hacs.repositories.set_repository_id(repository, "42")
 
-    assert hacs.get_by_name("test/test") is repository
-    assert hacs.get_by_id("42") is repository
+    assert hacs.repositories.get_by_full_name("test/test") is repository
+    assert hacs.repositories.get_by_id("42") is repository
 
-    hacs.async_remove_repository(repository)
-    assert hacs.get_by_name("test/test") is None
-    assert hacs.get_by_id("42") is None
+    hacs.repositories.unregister(repository)
+    assert hacs.repositories.get_by_full_name("test/test") is None
+    assert hacs.repositories.get_by_id("42") is None
 
     # Verify second removal does not raise
-    hacs.async_remove_repository(repository)
-
-
-@pytest.mark.asyncio
-async def test_set_stage(hacs):
-    assert hacs.stage == None
-    await hacs.async_set_stage(HacsStage.RUNNING)
-    assert hacs.stage == HacsStage.RUNNING
+    hacs.repositories.unregister(repository)

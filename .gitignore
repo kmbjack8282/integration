@@ -1,19 +1,29 @@
-site
-.pytest*
+# artifacts
 __pycache__
-action/Test
-settings.json
-.devcontainer/configuration.yaml
-node_modules
-custom_components/custom_components
-manage/secrets.json
+.pytest*
 *.egg-info
-*/dist/*
 */build/*
+*/dist/*
 
-# dependencies
-/node_modules
+
+# misc
 .coverage
+.python-version
+.venv
+.vscode
 coverage.xml
 htmlcov
+outputdata
+settings.json
 venv
+
+
+# Frontend are downloaded on release
+custom_components/hacs/hacs_frontend
+
+# Translation files
+custom_components/hacs/translations
+!custom_components/hacs/translations/en.json
+
+# Home Assistant configuration
+config

@@ -3,7 +3,7 @@
 import pytest
 
 from custom_components.hacs.exceptions import HacsException
-from custom_components.hacs.helpers.classes.manifest import HacsManifest
+from custom_components.hacs.repositories.base import HacsManifest
 
 
 def test_manifest_structure():
@@ -23,9 +23,6 @@ def test_manifest_structure():
     assert isinstance(manifest.filename, (str, type(None)))
     assert manifest.filename is None
 
-    assert isinstance(manifest.domains, list)
-    assert not manifest.domains
-
     assert isinstance(manifest.country, list)
     assert not manifest.country
 
@@ -34,12 +31,6 @@ def test_manifest_structure():
 
     assert isinstance(manifest.persistent_directory, (str, type(None)))
     assert manifest.persistent_directory is None
-
-    assert isinstance(manifest.iot_class, (str, type(None)))
-    assert manifest.iot_class is None
-
-    assert isinstance(manifest.render_readme, bool)
-    assert not manifest.render_readme
 
     assert isinstance(manifest.hacs, (str, type(None)))
     assert not manifest.hacs
